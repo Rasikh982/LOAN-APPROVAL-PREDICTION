@@ -45,7 +45,7 @@ def create_loan_dataset():
     return df
 
 if 'df' not in st.session_state:
-    with st.spinner('📊 Loading Loan Dataset...'):
+    with st.spinner('Loading Loan Dataset...'):
         st.session_state.df = create_loan_dataset()
         st.session_state.loaded = True
 
@@ -161,7 +161,7 @@ with st.expander("⚙️ Advanced Settings"):
 
 if st.button("🚀 Train Model", type="primary", use_container_width=True):
     try:
-        with st.spinner('🔄 Training model... Please wait'):
+        with st.spinner('Training model... Please wait'):
             X = df.drop(columns=[target_col]).copy()
             y = df[target_col].copy()
             st.info(f"📊 **Class Distribution**: {dict(y.value_counts())}")
@@ -207,12 +207,12 @@ if st.button("🚀 Train Model", type="primary", use_container_width=True):
             cv_scores = cross_val_score(model, X_train_scaled, y_train, cv=5, scoring='accuracy')
 
             # Save for Step 5
-            st.session_state.trained_model    = model
-            st.session_state.trained_scaler   = scaler
-            st.session_state.trained_le_dict  = le_dict
+            st.session_state.trained_model     = model
+            st.session_state.trained_scaler    = scaler
+            st.session_state.trained_le_dict   = le_dict
             st.session_state.trained_le_target = le_target
-            st.session_state.model_name       = model_name
-            st.session_state.model_trained    = True
+            st.session_state.model_name        = model_name
+            st.session_state.model_trained     = True
 
             st.success("✅ Model trained successfully!")
             st.markdown("---")
@@ -231,10 +231,10 @@ if st.button("🚀 Train Model", type="primary", use_container_width=True):
             with mc[3]: st.metric("F1-Score",  f"{f1:.2%}")
             with mc[4]: st.metric("CV Score",  f"{cv_scores.mean():.2%}")
 
-            if accuracy > 0.85:   st.success("🎉 **EXCELLENT PERFORMANCE!**")
-            elif accuracy > 0.75: st.info("👍 **GOOD PERFORMANCE!**")
-            elif accuracy > 0.65: st.warning("⚠️ **MODERATE PERFORMANCE.**")
-            else:                 st.error("❌ **POOR PERFORMANCE.**")
+            if accuracy > 0.85:   st.success("🎉 Excellent Performance! Model is ready for deployment!")
+            elif accuracy > 0.75: st.info("👍 Good Performance! Model works well.")
+            elif accuracy > 0.65: st.warning("⚠️ Moderate Performance. Consider trying a different model.")
+            else:                 st.error("❌ Poor Performance. Try a different model or check your data.")
 
             st.subheader("📋 Model Performance Summary")
             st.code(f"""
@@ -266,8 +266,8 @@ Confusion Matrix:
                 st.metric("False Positives (FP)", fp)
                 st.metric("False Negatives (FN)", fn)
                 st.metric("True Positives (TP)",  tp)
-                st.write(f"- ✅ Correct: {tn+tp} ({(tn+tp)/len(y_test)*100:.1f}%)")
-                st.write(f"- ❌ Wrong:   {fp+fn} ({(fp+fn)/len(y_test)*100:.1f}%)")
+                st.write(f"- ✅ Correct Predictions: {tn+tp} ({(tn+tp)/len(y_test)*100:.1f}%)")
+                st.write(f"- ❌ Wrong Predictions:   {fp+fn} ({(fp+fn)/len(y_test)*100:.1f}%)")
 
             st.subheader("📋 Detailed Classification Report")
             report = classification_report(y_test, y_pred, target_names=target_classes,
@@ -297,10 +297,10 @@ Confusion Matrix:
                     st.dataframe(importance_df.style.background_gradient(cmap='Purples'),
                                 use_container_width=True)
 
-            st.success("✅ EDA + ML completed successfully!")
+            st.success("✅ EDA + ML Pipeline completed successfully!")
 
     except Exception as e:
-        st.error(f"❌ **Error during training**: {str(e)}")
+        st.error(f"❌ Error during training: {str(e)}")
         with st.expander("🔍 See Full Error Details"):
             import traceback
             st.code(traceback.format_exc())
@@ -311,10 +311,10 @@ st.markdown("---")
 st.header("🎯 Step 5: Predict Your Loan Approval")
 
 if not st.session_state.get('model_trained', False):
-    st.warning("⚠️ Pehle Step 3 mein model train karein, phir yahan prediction hogi!")
+    st.warning("⚠️ Please train a model in Step 3 first before making predictions!")
 else:
-    st.success(f"✅ Trained Model: **{st.session_state.model_name}**")
-    st.markdown("Apni details bharein aur check karein ke loan milega ya nahi:")
+    st.success(f"✅ Using trained model: **{st.session_state.model_name}**")
+    st.markdown("Fill in your details below to check your loan eligibility:")
 
     with st.form("prediction_form"):
         st.subheader("👤 Personal Information")
@@ -363,22 +363,22 @@ else:
                 with c1: st.metric("Decision", "✅ Approved")
                 with c2: st.metric("CIBIL Score", p_cibil)
                 with c3: st.metric("Annual Income", f"Rs. {p_income:,}")
-                st.info("🎉 Mubarak ho! Aapki profile ke hisaab se loan approve hone ke chances zyada hain.")
+                st.info("🎉 Congratulations! Based on your profile, your loan is likely to be approved.")
             else:
                 st.error("## ❌ Loan REJECTED")
                 c1, c2, c3 = st.columns(3)
                 with c1: st.metric("Decision", "❌ Rejected")
                 with c2: st.metric("CIBIL Score", p_cibil)
                 with c3: st.metric("Annual Income", f"Rs. {p_income:,}")
-                st.warning("💡 Approval chances improve karne ke liye:")
+                st.warning("💡 Tips to improve your approval chances:")
                 st.markdown("""
-- 📈 **CIBIL Score badhayein** — 700+ aim karein
-- 💰 **Income badhayein** ya loan amount kam karein
-- 🏦 **Bank assets badhayein**
-- 📉 **Loan-to-Income ratio kam karein**
+- 📈 **Improve your CIBIL Score** — aim for 700+
+- 💰 **Increase your income** or reduce the loan amount
+- 🏦 **Increase your bank assets**
+- 📉 **Reduce your Loan-to-Income ratio** (loan should be less than 3x annual income)
 """)
 
-            with st.expander("📋 Aapki Input Summary"):
+            with st.expander("📋 View Your Input Summary"):
                 summary = {
                     "Dependents": p_dependents, "Education": p_education,
                     "Self Employed": p_self_employed, "Annual Income (Rs.)": f"{p_income:,}",
